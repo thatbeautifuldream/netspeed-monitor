@@ -19,7 +19,7 @@ A simple, lightweight menu bar application for monitoring your network speed in 
 ### Clone and Install
 
 ```sh
-git clone https://github.com/yourusername/netspeed-monitor.git
+git clone https://github.com/thatbeautifuldream/netspeed-monitor.git
 cd netspeed-monitor
 pnpm install
 ```
