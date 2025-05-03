@@ -1,8 +1,8 @@
 {
   "name": "netspeed-monitor",
   "productName": "netspeed-monitor",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "version": "0.0.1",
+  "description": "Menu bar network speed monitor",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
