@@ -11,7 +11,13 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx ."
   },
-  "keywords": [],
+  "keywords": [
+    "network",
+    "speed",
+    "monitor",
+    "menu",
+    "bar"
+  ],
   "author": {
     "name": "Milind Mishra",
     "email": "milind.mishra4@gmail.com"
