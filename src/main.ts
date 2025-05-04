@@ -1,6 +1,9 @@
 import { app, Menu, nativeImage, Tray } from "electron";
 import * as path from "path";
 import si from "systeminformation";
+import { formatMenuTitle } from "./menu-title";
+import { buildMenuDetails } from "./menu-details";
+import type { Systeminformation } from "systeminformation";
 
 let tray: Tray;
 let prevRx = 0,
@@ -9,17 +12,6 @@ let prevRx = 0,
 let menu: Menu;
 
 const EXCLUDED_PREFIXES = ["lo", "vir", "vbox", "docker", "br-"];
-
-function formatSpeed(bytesPerSecond: number) {
-  if (bytesPerSecond <= 0) return "--";
-  const bitsPerSecond = bytesPerSecond * 8;
-  if (bitsPerSecond < 1024) return `${bitsPerSecond} b/s`;
-  if (bitsPerSecond < 1024 * 1024)
-    return `${Math.round(bitsPerSecond / 1024)} Kb/s`;
-  if (bitsPerSecond < 1024 * 1024 * 1024)
-    return `${Math.round(bitsPerSecond / 1024 / 1024)} Mb/s`;
-  return `${Math.round(bitsPerSecond / 1024 / 1024 / 1024)} Gb/s`;
-}
 
 async function pollNetSpeed() {
   try {
@@ -43,68 +35,26 @@ async function pollNetSpeed() {
       txSpeed = Math.max(0, (txBytes - prevTx) / elapsed);
     }
 
-    // Set tray title to show both download and upload speeds
-    const trayTitle = `↓ ${formatSpeed(rxSpeed)} ↑ ${formatSpeed(txSpeed)}`;
-    tray.setTitle(trayTitle);
+    // Set tray title using imported function
+    tray.setTitle(formatMenuTitle(rxSpeed, txSpeed));
 
     // Get network interface details
     const interfaces = await si.networkInterfaces();
     const wifiNetworks = await si.wifiNetworks();
-    const interfacesArr = Array.isArray(interfaces) ? interfaces : [interfaces];
-    const wifiNetworksArr = Array.isArray(wifiNetworks)
+    const interfacesArr: Systeminformation.NetworkInterfacesData[] =
+      Array.isArray(interfaces) ? interfaces : [interfaces];
+    const wifiNetworksArr: Systeminformation.WifiNetworkData[] = Array.isArray(
+      wifiNetworks
+    )
       ? wifiNetworks
       : [wifiNetworks];
     // Find the default (active) interface
     const active = interfacesArr.find(
-      (iface: any) =>
-        iface.default && !iface.internal && iface.operstate === "up"
+      (iface) => iface.default && !iface.internal && iface.operstate === "up"
     );
-    const details: string[] = [];
-    if (active && active.type === "wireless") {
-      // Show only available Wi-Fi details for the connected network
-      const connectedWifi = wifiNetworksArr.reduce((best: any, curr: any) => {
-        if (!curr.ssid) return best;
-        if (!best || (curr.quality && curr.quality > (best.quality || 0)))
-          return curr;
-        return best;
-      }, null);
-      if (connectedWifi && connectedWifi.ssid)
-        details.push(`SSID: ${connectedWifi.ssid}`);
-      if (active.ip4) details.push(`IP Address: ${active.ip4}`);
-      if (connectedWifi && connectedWifi.gateway)
-        details.push(`Router: ${connectedWifi.gateway}`);
-      if (active.mac) details.push(`MAC Address: ${active.mac}`);
-      if (
-        connectedWifi &&
-        connectedWifi.security &&
-        connectedWifi.security.length > 0
-      )
-        details.push(`Security: ${connectedWifi.security.join(", ")}`);
-      if (connectedWifi && connectedWifi.bssid)
-        details.push(`BSSID: ${connectedWifi.bssid}`);
-      if (connectedWifi && connectedWifi.channel)
-        details.push(`Channel: ${connectedWifi.channel}`);
-      if (connectedWifi && connectedWifi.countryCode)
-        details.push(`Country Code: ${connectedWifi.countryCode}`);
-      if (connectedWifi && connectedWifi.signalLevel)
-        details.push(`RSSI: ${connectedWifi.signalLevel} dBm`);
-      if (active.speed) details.push(`Tx Rate: ${active.speed} Mbps`);
-      if (connectedWifi && connectedWifi.mode)
-        details.push(`PHY Mode: ${connectedWifi.mode}`);
-      if (connectedWifi && connectedWifi.quality)
-        details.push(`Signal: ${connectedWifi.quality}%`);
-      details.push(`State: ${active.operstate || "-"}`);
-    } else if (active) {
-      // For non-wireless, show basic details
-      details.push(`Interface: ${active.iface}`);
-      details.push(`Type: ${active.type}`);
-      if (active.ip4) details.push(`IPv4: ${active.ip4}`);
-      if (active.mac) details.push(`MAC: ${active.mac}`);
-      if (active.speed) details.push(`Speed: ${active.speed} Mbps`);
-      details.push(`State: ${active.operstate}`);
-    } else {
-      details.push("No active network interface");
-    }
+
+    // Build menu details using imported function
+    const details = buildMenuDetails(active, wifiNetworksArr);
 
     // Rebuild the menu with network details
     menu = Menu.buildFromTemplate([
@@ -133,6 +83,7 @@ app.whenReady().then(() => {
     tray = new Tray(nativeImage.createEmpty());
   }
 
+  // Initial menu with placeholder
   menu = Menu.buildFromTemplate([
     { label: "Network details loading...", enabled: false },
     { type: "separator" },
