@@ -11,14 +11,14 @@ let menu: Menu;
 const EXCLUDED_PREFIXES = ["lo", "vir", "vbox", "docker", "br-"];
 
 function formatSpeed(bytesPerSecond: number) {
-  if (bytesPerSecond <= 0) return "-";
+  if (bytesPerSecond <= 0) return "--";
   const bitsPerSecond = bytesPerSecond * 8;
-  if (bitsPerSecond < 1024) return `${Math.round(bitsPerSecond)} b/s`;
+  if (bitsPerSecond < 1024) return `${bitsPerSecond} b/s`;
   if (bitsPerSecond < 1024 * 1024)
-    return `${(bitsPerSecond / 1024).toFixed(1)} Kb/s`;
+    return `${Math.round(bitsPerSecond / 1024)} Kb/s`;
   if (bitsPerSecond < 1024 * 1024 * 1024)
-    return `${(bitsPerSecond / 1024 / 1024).toFixed(2)} Mb/s`;
-  return `${(bitsPerSecond / 1024 / 1024 / 1024).toFixed(2)} Gb/s`;
+    return `${Math.round(bitsPerSecond / 1024 / 1024)} Mb/s`;
+  return `${Math.round(bitsPerSecond / 1024 / 1024 / 1024)} Gb/s`;
 }
 
 async function pollNetSpeed() {
