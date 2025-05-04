@@ -2,8 +2,7 @@
 
 A simple, lightweight menu bar application for monitoring your network speed in real time. Built with Electron, it displays your current download and upload speeds directly in your system tray or menu bar.
 
-<img width="278" alt="image" src="https://github.com/user-attachments/assets/101d5d16-33ec-4b3e-a841-96c1a60bc796" />
-
+<img width="288" alt="image" src="https://github.com/user-attachments/assets/af31b6ea-397d-4969-b352-ee1ea2ccfdae" />
 
 ## Features
 
