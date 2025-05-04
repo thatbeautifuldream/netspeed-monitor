@@ -61,75 +61,38 @@ async function pollNetSpeed() {
     );
     const details: string[] = [];
     if (active && active.type === "wireless") {
-      // Show all available Wi-Fi details for the connected network
+      // Show only available Wi-Fi details for the connected network
       const connectedWifi = wifiNetworksArr.reduce((best: any, curr: any) => {
         if (!curr.ssid) return best;
         if (!best || (curr.quality && curr.quality > (best.quality || 0)))
           return curr;
         return best;
       }, null);
-      details.push(`Interface Name: ${active.iface || "-"}`);
-      details.push(`MAC Address: ${active.mac || "-"}`);
-      details.push(`IP Address: ${active.ip4 || "-"}`);
-      details.push(
-        `Router: ${
-          connectedWifi && connectedWifi.gateway ? connectedWifi.gateway : "-"
-        }`
-      );
-      details.push(
-        `Security: ${
-          connectedWifi &&
-          connectedWifi.security &&
-          connectedWifi.security.length > 0
-            ? connectedWifi.security.join(", ")
-            : "None"
-        }`
-      );
-      details.push(
-        `BSSID: ${
-          connectedWifi && connectedWifi.bssid ? connectedWifi.bssid : "-"
-        }`
-      );
-      details.push(
-        `Channel: ${
-          connectedWifi && connectedWifi.channel ? connectedWifi.channel : "-"
-        }`
-      );
-      details.push(
-        `Country Code: ${
-          connectedWifi && connectedWifi.countryCode
-            ? connectedWifi.countryCode
-            : "-"
-        }`
-      );
-      details.push(
-        `RSSI: ${
-          connectedWifi && connectedWifi.signalLevel
-            ? connectedWifi.signalLevel + " dBm"
-            : "-"
-        }`
-      );
-      details.push(`Noise: -`); // Not available from systeminformation
-      details.push(`Tx Rate: ${active.speed ? active.speed + " Mbps" : "-"}`);
-      details.push(
-        `PHY Mode: ${
-          connectedWifi && connectedWifi.mode ? connectedWifi.mode : "-"
-        }`
-      );
-      details.push(`MCS Index: -`); // Not available from systeminformation
-      details.push(`NSS: -`); // Not available from systeminformation
-      details.push(
-        `SSID: ${
-          connectedWifi && connectedWifi.ssid ? connectedWifi.ssid : "-"
-        }`
-      );
-      details.push(
-        `Signal: ${
-          connectedWifi && connectedWifi.quality
-            ? connectedWifi.quality + "%"
-            : "-"
-        }`
-      );
+      if (connectedWifi && connectedWifi.ssid)
+        details.push(`SSID: ${connectedWifi.ssid}`);
+      if (active.ip4) details.push(`IP Address: ${active.ip4}`);
+      if (connectedWifi && connectedWifi.gateway)
+        details.push(`Router: ${connectedWifi.gateway}`);
+      if (active.mac) details.push(`MAC Address: ${active.mac}`);
+      if (
+        connectedWifi &&
+        connectedWifi.security &&
+        connectedWifi.security.length > 0
+      )
+        details.push(`Security: ${connectedWifi.security.join(", ")}`);
+      if (connectedWifi && connectedWifi.bssid)
+        details.push(`BSSID: ${connectedWifi.bssid}`);
+      if (connectedWifi && connectedWifi.channel)
+        details.push(`Channel: ${connectedWifi.channel}`);
+      if (connectedWifi && connectedWifi.countryCode)
+        details.push(`Country Code: ${connectedWifi.countryCode}`);
+      if (connectedWifi && connectedWifi.signalLevel)
+        details.push(`RSSI: ${connectedWifi.signalLevel} dBm`);
+      if (active.speed) details.push(`Tx Rate: ${active.speed} Mbps`);
+      if (connectedWifi && connectedWifi.mode)
+        details.push(`PHY Mode: ${connectedWifi.mode}`);
+      if (connectedWifi && connectedWifi.quality)
+        details.push(`Signal: ${connectedWifi.quality}%`);
       details.push(`State: ${active.operstate || "-"}`);
     } else if (active) {
       // For non-wireless, show basic details
@@ -171,8 +134,7 @@ app.whenReady().then(() => {
   }
 
   menu = Menu.buildFromTemplate([
-    { label: "↓ --", enabled: true },
-    { label: "↑ --", enabled: true },
+    { label: "Network details loading...", enabled: false },
     { type: "separator" },
     { label: "Quit", click: () => app.quit() },
   ]);
